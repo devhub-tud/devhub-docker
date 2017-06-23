@@ -1,0 +1,32 @@
+gitolite:
+  build: 'gitolite'
+  volumes:
+    - repositories:/home/git/repositories
+    - ~/.ssh:/home/git/.ssh
+  ports:
+    - 22:2222
+git-server:
+  build: 'git-server'
+  links:
+    - gitolite
+  volumes:
+    - repositories:/opt/git-server/repositories
+    - ~/.ssh:/root/.ssh
+  ports:
+    - 8081:8081
+postgres:
+  image: 'postgres'
+  environment:
+    - POSTGRES_PASSWORD=mysecretpassword
+    - POSTGRES_USER=devhub
+    - POSTGRES_DB=devhub
+ldap:
+  image: 'larrycai/openldap'
+devhub:
+  build: 'devhub'
+  links:
+    - git-server
+    - postgres
+    - ldap
+  ports:
+    - 8080:8080
